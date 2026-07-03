@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Counter</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #0f1115; color: #f5f5f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+  }
+  .app {
+    width: 100%; max-width: 420px; padding: 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .display {
+    font-size: 64px; font-weight: 700; letter-spacing: -1px;
+    text-align: center;
+  }
+  .percent {
+    font-size: 20px; color: #9a9ba3; margin-top: -12px;
+  }
+  .buttons {
+    width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 12px;
+  }
+  button {
+    border: none; border-radius: 16px; font-size: 22px; font-weight: 600;
+    padding: 22px; width: 100%; cursor: pointer;
+    transition: transform 0.08s ease, opacity 0.08s ease;
+  }
+  button:active { transform: scale(0.97); opacity: 0.85; }
+  .success-btn { background: #30d158; color: #04220c; }
+  .fail-btn { background: #ff453a; color: #2a0503; }
+  .reset-btn {
+    background: transparent; color: #9a9ba3; border: 1px solid #33343a;
+    font-size: 16px; font-weight: 500; padding: 12px; margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="display" id="display">0 / 0</div>
+    <div class="percent" id="percent">—</div>
+    <div class="buttons">
+      <button class="success-btn" id="successBtn">✅ Success</button>
+      <button class="fail-btn" id="failBtn">❌ Fail</button>
+      <button class="reset-btn" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+<script>
+  const STORAGE_KEY = "counterAppState";
+  let state = { successes: 0, attempts: 0 };
+
+  function load() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) state = JSON.parse(saved);
+    } catch (e) {}
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function render() {
+    document.getElementById("display").textContent = `${state.successes} / ${state.attempts}`;
+    const pctEl = document.getElementById("percent");
+    if (state.attempts === 0) {
+      pctEl.textContent = "—";
+    } else {
+      const pct = Math.round((state.successes / state.attempts) * 100);
+      pctEl.textContent = `${pct}%`;
+    }
+  }
+
+  document.getElementById("successBtn").addEventListener("click", () => {
+    state.successes += 1;
+    state.attempts += 1;
+    save();
+    render();
+  });
+
+  document.getElementById("failBtn").addEventListener("click", () => {
+    state.attempts += 1;
+    save();
+    render();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (confirm("Reset counter to 0/0?")) {
+      state = { successes: 0, attempts: 0 };
+      save();
+      render();
+    }
+  });
+
+  load();
+  render();
+</script>
+</body>
+</html>
